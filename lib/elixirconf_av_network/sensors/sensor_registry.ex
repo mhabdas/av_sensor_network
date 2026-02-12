@@ -13,8 +13,10 @@ defmodule ElixirconfAvNetwork.Sensors.SensorRegistry do
   end
 
   def registered_keys do
-    Registry.select(__MODULE__, [{{:"$1", :_, :_}, [], [:"$1"]}])
-    |> Enum.map(&hd/1)
+    spec = [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]
+
+    Registry.select(__MODULE__, spec)
+    |> Enum.map(&elem(&1, 0))
     |> Enum.uniq()
   end
 end

@@ -57,7 +57,7 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
 
   def handle_info(:poll, state) do
     value = fetch_sensor_value(state.data_source, state.sensor_key)
-    timestamp = if value != nil, do: System.monotonic_time(:millisecond), else: state.timestamp
+    timestamp = if value != nil, do: System.system_time(:millisecond), else: state.timestamp
 
     new_state = %{state | value: value, timestamp: timestamp}
 
