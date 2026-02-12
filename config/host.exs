@@ -2,6 +2,8 @@ import Config
 
 # Add configuration that is only needed when running on the host here.
 
+config :elixirconf_av_network, :arduino_port, "/dev/cu.usbmodem101"
+
 config :nerves_runtime,
   kv_backend:
     {Nerves.Runtime.KVBackend.InMemory,
