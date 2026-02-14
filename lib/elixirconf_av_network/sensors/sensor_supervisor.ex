@@ -5,6 +5,7 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
   """
   use DynamicSupervisor
 
+  alias ElixirconfAvNetwork.Hardware.ArduinoConnection
   alias ElixirconfAvNetwork.Sensors.Sensor
   alias ElixirconfAvNetwork.Sensors.SensorRegistry
 
@@ -50,7 +51,7 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
       Sensor,
       [
         sensor_key: sensor_key,
-        data_source: ElixirconfAvNetwork.Hardware.ArduinoConnection.data_source_name(),
+        data_source: ArduinoConnection.data_source_name(),
         poll_interval_ms: 1000,
         name: SensorRegistry.via_tuple(sensor_key)
       ]

@@ -76,9 +76,9 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
     buffer = state.buffer <> data
     {readings, new_buffer} = extract_all_frames(buffer, state.readings)
 
-    for sensor_key <- Map.keys(readings) do
+    Enum.each(readings, fn {sensor_key, _value} ->
       SensorSupervisor.start_sensor_if_needed(sensor_key)
-    end
+    end)
 
     {:noreply, %{state | readings: readings, buffer: new_buffer}}
   end

@@ -1,7 +1,10 @@
 defmodule ElixirconfAvNetwork.Sensors.Sensor do
   @moduledoc """
   Process per sensor - each sensor has its own isolated process.
+  Handles its own data and routes to outputs (e.g. AudioEngine).
   """
+  alias ElixirconfAvNetwork.Output.AudioEngine
+
   use GenServer
 
   require Logger
@@ -59,10 +62,13 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
     value = fetch_sensor_value(state.data_source, state.sensor_key)
     timestamp = if value != nil, do: System.system_time(:millisecond), else: state.timestamp
 
+    with {:ok, new_value} <- validate(value),
+         true <- new_value != state.value do
+      AudioEngine.handle(state.sensor_key, new_value)
+    end
+
     new_state = %{state | value: value, timestamp: timestamp}
-
     Process.send_after(self(), :poll, state.poll_interval_ms)
-
     {:noreply, new_state}
   end
 
@@ -77,4 +83,8 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
   rescue
     _ -> nil
   end
+
+  defp validate(nil), do: {:error, :no_value}
+  defp validate(value) when is_integer(value), do: {:ok, value}
+  defp validate(_), do: {:error, :invalid_value}
 end
