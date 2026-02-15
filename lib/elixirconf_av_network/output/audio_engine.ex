@@ -2,55 +2,45 @@ defmodule ElixirconfAvNetwork.Output.AudioEngine do
   alias ElixirconfAvNetwork.Output.OSCOutput
   require Logger
 
-  @pentatonic [0, 2, 4, 7, 9]
-  # Middle C
-  @base_note 60
+  # C3
+  @base_note 48
 
-  # POT1 → frequency (pentatonic scale)
+  # POT1 → pitch bend / vibrato
   def handle("POT1", value) do
-    freq = pot_to_frequency(value)
-    OSCOutput.send_message("/frequency", [freq])
+    bend = Float.round(value / 1023 * 2 - 1, 3)
+    OSCOutput.send_message("/pitch_bend", [bend])
   end
 
-  # POT2 → reverb (0.0 - 1.0)
+  # POT2 → filter (light/dark)
   def handle("POT2", value) do
-    reverb = Float.round(value / 1023, 2)
-    OSCOutput.send_message("/reverb", [reverb])
+    cutoff = Float.round(200 + value / 1023 * 7800, 1)
+    OSCOutput.send_message("/filter_cutoff", [cutoff])
   end
 
-  # BTN1 → note trigger
+  # BTN1 → note trigger (C)
   def handle("BTN1", 1) do
-    Logger.info("BTN1: 1")
-    OSCOutput.send_message("/trigger", [1])
+    freq = midi_to_hz(@base_note)
+    OSCOutput.send_message("/note_on", [freq])
   end
 
-  def handle("BTN1", 0) do
-    OSCOutput.send_message("/trigger", [0])
-  end
-
-  # BTN2 → scale up
+  # BTN2 → note trigger (Eb)
   def handle("BTN2", 1) do
-    OSCOutput.send_message("octave", [1])
+    freq = midi_to_hz(@base_note + 3)
+    OSCOutput.send_message("/note_on", [freq])
   end
 
-  # BTN3 → scale down
+  # BTN3 → note trigger (G)
   def handle("BTN3", 1) do
-    OSCOutput.send_message("octave", [-1])
+    freq = midi_to_hz(@base_note + 7)
+    OSCOutput.send_message("/note_on", [freq])
   end
+
+  def handle("BTN1", 0), do: OSCOutput.send_message("/note_off", [0])
+  def handle("BTN2", 0), do: OSCOutput.send_message("/note_off", [0])
+  def handle("BTN3", 0), do: OSCOutput.send_message("/note_off", [0])
 
   # Ignore other sensors for now
   def handle(_sensor, _value), do: :ok
-
-  # Private: map POT value to pentatonic scale frequency
-  defp pot_to_frequency(value) do
-    # 3 octaves
-    steps = length(@pentatonic) * 3
-    index = round(value / 1023 * (steps - 1))
-    octave = div(index, length(@pentatonic))
-    degree = rem(index, length(@pentatonic))
-    midi_note = @base_note + octave * 12 + Enum.at(@pentatonic, degree)
-    midi_to_hz(midi_note)
-  end
 
   # MIDI note → Hz
   defp midi_to_hz(note) do

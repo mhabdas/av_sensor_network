@@ -52,7 +52,7 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
       [
         sensor_key: sensor_key,
         data_source: ArduinoConnection.data_source_name(),
-        poll_interval_ms: 1000,
+        poll_interval_ms: poll_interval_ms(sensor_key),
         name: SensorRegistry.via_tuple(sensor_key)
       ]
     }
@@ -63,4 +63,10 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
       {:error, reason} -> {:error, reason}
     end
   end
+
+  defp poll_interval_ms("BTN" <> _rest), do: 10
+  defp poll_interval_ms("POT" <> _rest), do: 50
+  defp poll_interval_ms(_sensor_key), do: 100
 end
+
+X

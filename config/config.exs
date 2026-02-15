@@ -18,6 +18,9 @@ config :nerves, :firmware, rootfs_overlay: "rootfs_overlay"
 
 config :nerves, source_date_epoch: "1769941372"
 
+config :elixirconf_av_network,
+  protocol: :json
+
 if Mix.target() == :host do
   import_config "host.exs"
 else

@@ -1,4 +1,4 @@
-defmodule ElixirconfAvNetwork.Hardware.Protocol do
+defmodule ElixirconfAvNetwork.Hardware.ProtocolBinary do
   @moduledoc """
   Binary protocol for hardware (e.g. Arduino over UART).
 

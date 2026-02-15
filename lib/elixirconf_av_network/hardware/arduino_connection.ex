@@ -2,7 +2,8 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
   @moduledoc """
   Connection to the Arduino via UART. Receives data and parses it for the Sensors.
   """
-  alias ElixirconfAvNetwork.Hardware.Protocol
+  alias ElixirconfAvNetwork.Hardware.ProtocolBinary
+  alias ElixirconfAvNetwork.Hardware.ProtocolJson
   alias ElixirconfAvNetwork.Sensors.SensorSupervisor
 
   use GenServer
@@ -39,12 +40,20 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
            }}
           | {:stop, any()}
   def init(opts) when is_list(opts) do
+    protocol = Application.get_env(:elixirconf_av_network, :protocol)
+
+    framing =
+      case protocol do
+        :binary -> {Circuits.UART.Framing.None}
+        :json -> {Circuits.UART.Framing.Line, separator: "\n"}
+      end
+
     port = Keyword.get(opts, :port)
     baud = Keyword.get(opts, :baud, 115_200)
     uart_module = Keyword.get(opts, :uart_module, Circuits.UART)
 
     with {:ok, uart_pid} <- uart_module.start_link([]),
-         :ok <- uart_module.open(uart_pid, port, speed: baud, active: true),
+         :ok <- uart_module.open(uart_pid, port, speed: baud, active: true, framing: framing),
          :ok <- uart_module.flush(uart_pid, :both) do
       Logger.info("UART port opened successfully: #{port}")
 
@@ -73,8 +82,8 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
   end
 
   def handle_info({:circuits_uart, _port_id, data}, state) when is_binary(data) do
-    buffer = state.buffer <> data
-    {readings, new_buffer} = extract_all_frames(buffer, state.readings)
+    protocol = Application.get_env(:elixirconf_av_network, :protocol)
+    {readings, new_buffer} = process_data(protocol, data, state)
 
     Enum.each(readings, fn {sensor_key, _value} ->
       SensorSupervisor.start_sensor_if_needed(sensor_key)
@@ -95,14 +104,33 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
     end
   end
 
-  defp extract_all_frames(buffer, readings_acc) do
-    case Protocol.extract_frame_from_buffer(buffer) do
+  defp process_data(:json, data, state) do
+    case ProtocolJson.parse_sensor_data(data) do
+      {:ok, {sensor_name, value}} ->
+        {Map.put(state.readings, sensor_name, value), <<>>}
+
+      {:error, _} ->
+        {state.readings, <<>>}
+    end
+  end
+
+  defp process_data(:binary, data, state) do
+    buffer = state.buffer <> data
+    extract_binary_frames(buffer, state.readings)
+  end
+
+  defp process_data(_, _data, state) do
+    {state.readings, state.buffer}
+  end
+
+  defp extract_binary_frames(buffer, readings_acc) do
+    case ProtocolBinary.extract_frame_from_buffer(buffer) do
       {:ok, {:ok, sensor_name, value}, rest} ->
         readings = Map.put(readings_acc, sensor_name, value)
-        extract_all_frames(rest, readings)
+        extract_binary_frames(rest, readings)
 
       {:error, :checksum_mismatch, rest} ->
-        extract_all_frames(rest, readings_acc)
+        extract_binary_frames(rest, readings_acc)
 
       :incomplete ->
         {readings_acc, buffer}
