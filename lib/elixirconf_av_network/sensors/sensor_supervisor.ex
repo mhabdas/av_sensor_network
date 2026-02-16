@@ -5,7 +5,6 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
   """
   use DynamicSupervisor
 
-  alias ElixirconfAvNetwork.Hardware.ArduinoConnection
   alias ElixirconfAvNetwork.Sensors.Sensor
   alias ElixirconfAvNetwork.Sensors.SensorRegistry
 
@@ -16,19 +15,20 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
   @doc """
   Starts a Sensor process for the given sensor_key if it doesn't exist yet.
   Idempotent – does nothing when the Sensor is already running.
+  Requires data_source (e.g. :arduino_interactive or :arduino_environmental).
   """
-  def start_sensor_if_needed(sensor_key) when is_binary(sensor_key) do
+  def start_sensor_if_needed(sensor_key, data_source) when is_binary(sensor_key) do
     case SensorRegistry.whereis(sensor_key) do
       :undefined ->
-        start_sensor(sensor_key)
+        start_sensor(sensor_key, data_source)
 
       _pid ->
         :ok
     end
   end
 
-  def start_sensor_if_needed(sensor_key) when is_atom(sensor_key) do
-    start_sensor_if_needed(to_string(sensor_key))
+  def start_sensor_if_needed(sensor_key, data_source) when is_atom(sensor_key) do
+    start_sensor_if_needed(to_string(sensor_key), data_source)
   end
 
   @doc """
@@ -46,12 +46,12 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  defp start_sensor(sensor_key) do
+  defp start_sensor(sensor_key, data_source) do
     child_spec = {
       Sensor,
       [
         sensor_key: sensor_key,
-        data_source: ArduinoConnection.data_source_name(),
+        data_source: data_source,
         poll_interval_ms: poll_interval_ms(sensor_key),
         name: SensorRegistry.via_tuple(sensor_key)
       ]
@@ -68,5 +68,3 @@ defmodule ElixirconfAvNetwork.Sensors.SensorSupervisor do
   defp poll_interval_ms("POT" <> _rest), do: 50
   defp poll_interval_ms(_sensor_key), do: 100
 end
-
-X

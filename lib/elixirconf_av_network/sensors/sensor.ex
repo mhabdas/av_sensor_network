@@ -38,7 +38,7 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
 
   def init(opts) do
     sensor_key = Keyword.fetch!(opts, :sensor_key)
-    data_source = Keyword.get(opts, :data_source, :arduino_data_source)
+    data_source = Keyword.fetch!(opts, :data_source)
     poll_interval_ms = Keyword.get(opts, :poll_interval_ms, @default_poll_interval_ms)
 
     state = %{
