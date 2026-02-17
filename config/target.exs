@@ -88,13 +88,10 @@ config :mdns_lite,
     }
   ]
 
-# Arduino ports: omit to use autodetect (identifies by sensor data: POT/BTN → interactive).
-# Or use arduino_*_serial for stable assignment (run mix arduino.ports on device).
+# Hardcoded ports (autodetect commented out for now)
 config :elixirconf_av_network,
-  arduino_port: "ttyACM0"
-
-# arduino_interactive_port: "ttyACM0"
-# arduino_environmental_port: "ttyACM1"
+  arduino_interactive_port: "ttyACM0",
+  arduino_environmental_port: "ttyACM1"
 
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

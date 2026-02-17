@@ -33,7 +33,8 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoSupervisor do
     ]
 
     children = [
-      ElixirconfAvNetwork.Hardware.ArduinoPortDetectorService,
+      # Autodetect: uncomment when using port: :auto
+      # ElixirconfAvNetwork.Hardware.ArduinoPortDetectorService,
       Supervisor.child_spec({ArduinoConnection, inter_opts},
         id: ArduinoConnection.interactive_name()
       ),

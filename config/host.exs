@@ -2,13 +2,15 @@ import Config
 
 # Add configuration that is only needed when running on the host here.
 
-# Arduino ports: omit to use autodetect (identifies by sensor data: POT/BTN → interactive).
-# Or use arduino_*_serial for stable assignment when you swap USB cables (run mix arduino.ports).
+# Hardcoded ports – run `mix arduino.ports` to find yours (numbers vary per USB port)
 config :elixirconf_av_network,
-  arduino_port: "/dev/cu.usbmodem101"
+  arduino_interactive_port: "/dev/cu.usbmodem1101",
+  arduino_environmental_port: "/dev/cu.usbmodem1201"
 
-# arduino_interactive_port: "/dev/cu.usbmodem101"
-# arduino_interactive_serial: "YOUR_SERIAL"   # from mix arduino.ports
+# Autodetect: comment ports above and uncomment below, then uncomment ArduinoPortDetectorService in arduino_supervisor.ex
+# config :elixirconf_av_network,
+#   arduino_port: "/dev/cu.usbmodem101"
+# Or use arduino_*_serial (run mix arduino.ports for serial numbers)
 
 config :nerves_runtime,
   kv_backend:
