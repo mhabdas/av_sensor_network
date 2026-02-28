@@ -5,7 +5,7 @@ import Config
 # Hardcoded ports – run `mix arduino.ports` to find yours (numbers vary per USB port)
 config :elixirconf_av_network,
   arduino_interactive_port: "/dev/cu.usbmodem1101",
-  arduino_environmental_port: "/dev/cu.usbmodem1201"
+  arduino_environmental_port: "/dev/cu.usbmodem11201"
 
 # Autodetect: comment ports above and uncomment below, then uncomment ArduinoPortDetectorService in arduino_supervisor.ex
 # config :elixirconf_av_network,

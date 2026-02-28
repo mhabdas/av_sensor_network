@@ -45,24 +45,63 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
   end
 
   def handle_info(:detect_port, %{connected: false} = state) do
-    with {:ok, port} when is_binary(port) <- ArduinoPortDetectorService.get_port(state.role),
+    available_ports = Circuits.UART.enumerate()
+
+    with port = find_port_for_role(available_ports, state.role),
          {:ok, uart_pid} <- open_uart(port, state.baud, state.uart_module) do
       Logger.info("UART port opened: #{port}")
       {:noreply, %{state | port: port, uart: uart_pid, connected: true}}
     else
-      {:ok, nil} -> {:noreply, state}
+      {:ok, nil} -> schedule_detect_retry(state)
       {:error, _} -> schedule_detect_retry(state)
     end
   end
 
   def handle_info(:detect_port, state), do: {:noreply, state}
 
+  def handle_info(:retry_connect, %{connected: false} = state) do
+    case open_uart(state.port, state.baud, state.uart_module) do
+      {:ok, uart_pid} ->
+        Logger.info("Connected to #{state.port}")
+        {:noreply, %{state | uart: uart_pid, connected: true}}
+
+      {:error, _} ->
+        Process.send_after(self(), :retry_connect, @retry_delay_ms)
+        {:noreply, state}
+    end
+  end
+
   def handle_info({:circuits_uart, _port_id, data}, state) when is_binary(data) do
     if state.uart, do: process_uart_data(data, state), else: {:noreply, state}
   end
 
+  def handle_info({:circuits_uart, _port_id, {:error, reason}}, state)
+      when reason in [:eio, :einval, :enotconn, :epipe] do
+    Logger.warning("Arduino #{state.role} disconnected - clearing readings")
+    {:noreply, %{state | connected: false, readings: %{}}}
+  end
+
   def handle_info({:circuits_uart, _port_id, {:error, reason}}, state) do
     Logger.warning("UART error: #{inspect(reason)}")
+    {:noreply, state}
+  end
+
+  def handle_info(:check_connection, %{connected: false, port: port} = state)
+      when is_binary(port) do
+    case open_uart(port, state.baud, state.uart_module) do
+      {:ok, uart_pid} ->
+        Logger.info("Arduino #{state.role} reconnected to #{port}!")
+        Process.send_after(self(), :check_connection, 5_000)
+        {:noreply, %{state | uart: uart_pid, connected: true}}
+
+      {:error, _} ->
+        Process.send_after(self(), :check_connection, 5_000)
+        {:noreply, state}
+    end
+  end
+
+  def handle_info(:check_connection, state) do
+    Process.send_after(self(), :check_connection, 5_000)
     {:noreply, state}
   end
 
@@ -81,14 +120,16 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
     {:ok, Map.merge(base, %{port: nil, uart: nil, connected: false})}
   end
 
-  defp init_connection(port, base) do
+  defp init_connection(port, base) when is_binary(port) do
+    Process.send_after(self(), :check_connection, 5_000)
+
     case open_uart(port, base.baud, base.uart_module) do
       {:ok, uart_pid} ->
-        Logger.info("UART port opened: #{port}")
-        {:ok, Map.merge(base, %{port: port, uart: uart_pid})}
+        {:ok, Map.merge(base, %{port: port, uart: uart_pid, connected: true})}
 
-      {:error, :enoent} ->
-        Logger.warning("Arduino not found on port #{port}")
+      {:error, reason} ->
+        Logger.warning("Port #{port} not available: #{inspect(reason)}, retrying...")
+        Process.send_after(self(), :retry_connect, @retry_delay_ms)
         {:ok, Map.merge(base, %{port: port, uart: nil, connected: false})}
     end
   end
@@ -110,6 +151,19 @@ defmodule ElixirconfAvNetwork.Hardware.ArduinoConnection do
   end
 
   # ——— Private: UART & data processing ———
+
+  defp find_port_for_role(available_ports, role) do
+    arduino_ports =
+      available_ports
+      |> Enum.filter(fn {path, _} -> path =~ ~r/(usbmodem|ttyACM|ttyUSB)/i end)
+      |> Enum.sort_by(fn {path, _} -> path end)
+
+    case {role, arduino_ports} do
+      {:interactive, [{port, _} | _]} -> port
+      {:environmental, [_, {port, _} | _]} -> port
+      _ -> nil
+    end
+  end
 
   defp open_uart(port, baud, uart_module) do
     protocol = Application.get_env(:elixirconf_av_network, :protocol)
