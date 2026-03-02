@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
     <title>Sensor Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +20,14 @@
       </header>
       <%= @inner_content %>
     </div>
-    <script defer phx-track-static type="text/javascript" src="/assets/app.js"></script>
+    <script phx-track-static src="/vendor/phoenix/phoenix.min.js"></script>
+    <script phx-track-static src="/vendor/phoenix_live_view/phoenix_live_view.min.js"></script>
+    <script phx-track-static>
+      (function() {
+        var csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+        var liveSocket = new LiveView.LiveSocket("/live", Phoenix.Socket, { params: { _csrf_token: csrfToken } });
+        liveSocket.connect();
+      })();
+    </script>
   </body>
 </html>

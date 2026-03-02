@@ -38,6 +38,13 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
     end
   end
 
+  @doc """
+  Returns %{value: value, timestamp: timestamp, timed_out: boolean} for the dashboard.
+  """
+  def get_status(pid) when is_pid(pid) do
+    GenServer.call(pid, :get_status)
+  end
+
   def init(opts) do
     sensor_key = Keyword.fetch!(opts, :sensor_key)
     data_source = Keyword.fetch!(opts, :data_source)
@@ -59,6 +66,10 @@ defmodule ElixirconfAvNetwork.Sensors.Sensor do
 
   def handle_call(:read, _from, state) do
     {:reply, {:ok, state.value, state.timestamp}, state}
+  end
+
+  def handle_call(:get_status, _from, state) do
+    {:reply, %{value: state.value, timestamp: state.timestamp, timed_out: state.timed_out}, state}
   end
 
   def handle_info(

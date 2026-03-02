@@ -16,6 +16,19 @@ defmodule ElixirconfAvNetwork.Web.Endpoint do
     only: ~w(assets)
   )
 
+  # Serve Phoenix/LiveView JS from deps (fallback when CDN unavailable)
+  plug(Plug.Static,
+    at: "/vendor/phoenix",
+    from: {:phoenix, "priv/static"},
+    gzip: false
+  )
+
+  plug(Plug.Static,
+    at: "/vendor/phoenix_live_view",
+    from: {:phoenix_live_view, "priv/static"},
+    gzip: false
+  )
+
   if code_reloading? do
     socket("/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket)
     plug(Phoenix.LiveReloader)
