@@ -21,8 +21,16 @@ config :nerves, source_date_epoch: "1769941372"
 config :elixirconf_av_network,
   protocol: :json
 
+config :elixirconf_av_network, ElixirconfAvNetwork.Web.Endpoint,
+  url: [host: "localhost", port: 3000],
+  render_errors: [view: ElixirconfAvNetwork.Web.ErrorView, accepts: ~w(html)],
+  pubsub_server: ElixirconfAvNetwork.PubSub,
+  live_view: [signing_salt: "elixirconf_av_network_sensor_dash"]
+
 if Mix.target() == :host do
   import_config "host.exs"
 else
   import_config "target.exs"
 end
+
+import_config "runtime.exs"

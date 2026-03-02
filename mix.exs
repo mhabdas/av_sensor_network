@@ -55,6 +55,12 @@ defmodule ElixirconfAvNetwork.MixProject do
       {:circuits_uart, "~> 1.5.5"},
       {:oscx, "~> 0.1.0"},
       {:jason, "~> 1.4"},
+      {:phoenix, "~> 1.7"},
+      {:phoenix_view, "~> 2.0"},
+      {:phoenix_live_view, "~> 0.20"},
+      {:phoenix_html, "~> 3.3"},
+      {:phoenix_live_reload, "~> 1.4", only: :dev},
+      {:plug_cowboy, "~> 2.6"},
 
       # Allow Nerves.Runtime on host to support development, testing and CI.
       # See config/host.exs for usage.

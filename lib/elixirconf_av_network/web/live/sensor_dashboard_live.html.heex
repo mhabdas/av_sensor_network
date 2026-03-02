@@ -1,0 +1,32 @@
+<div class="sensor-dashboard">
+  <section class="dashboard-header">
+    <h2 class="dashboard-title">Connected Sensors</h2>
+    <p class="dashboard-subtitle"><%= length(@sensors) %> sensor<%= if length(@sensors) != 1, do: "s", else: "" %> in network</p>
+  </section>
+  <div class="sensor-grid">
+    <%= for sensor <- @sensors do %>
+      <article class={"sensor-card sensor-card--#{sensor.status}"}>
+        <div class="sensor-card__header">
+          <h3 class="sensor-card__name"><%= sensor.name %></h3>
+          <span class={"sensor-card__badge sensor-card__badge--#{sensor.status}"}>
+            <%= sensor.status %>
+          </span>
+        </div>
+        <div class="sensor-card__value">
+          <span class="sensor-card__value-label">Current value</span>
+          <span class="sensor-card__value-data"><%= sensor.value || "—" %></span>
+        </div>
+        <div class="sensor-card__footer">
+          <span class="sensor-card__timestamp">⟳ <%= if sensor.timestamp, do: format_timestamp(sensor.timestamp), else: "never" %></span>
+        </div>
+      </article>
+    <% end %>
+  </div>
+  <%= if @sensors == [] do %>
+    <div class="empty-state">
+      <p class="empty-state__icon">◉</p>
+      <p class="empty-state__text">No sensors connected yet</p>
+      <p class="empty-state__hint">Connect Arduino devices to see live data</p>
+    </div>
+  <% end %>
+</div>

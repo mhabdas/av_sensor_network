@@ -8,6 +8,8 @@ defmodule ElixirconfAvNetwork.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Phoenix.PubSub, name: ElixirconfAvNetwork.PubSub},
+      ElixirconfAvNetwork.Web.Endpoint,
       {Registry, keys: :unique, name: ElixirconfAvNetwork.Sensors.SensorRegistry},
       ElixirconfAvNetwork.Hardware.ArduinoSupervisor,
       ElixirconfAvNetwork.Sensors.SensorSupervisor
