@@ -2,6 +2,7 @@
 #define SENSOR_LIGHT2 0x21
 #define SENSOR_TEMP1  0x30
 #define SENSOR_TEMP2  0x31
+#define SENSOR_TEMP3  0x32
 #define START_BYTE 0xFF
 #define BAUD_RATE 115200
 
@@ -26,5 +27,6 @@ void loop() {
   sendSensor(SENSOR_LIGHT2, analogRead(A1));
   sendSensor(SENSOR_TEMP1,  analogRead(A2));
   sendSensor(SENSOR_TEMP2,  analogRead(A3));
+  sendSensor(SENSOR_TEMP3,  analogRead(A4));
   delay(100);
 }

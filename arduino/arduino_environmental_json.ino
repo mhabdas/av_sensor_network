@@ -17,5 +17,6 @@ void loop() {
   sendSensor("LIGHT2", analogRead(A1));
   sendSensor("TEMP1",  analogRead(A2));
   sendSensor("TEMP2",  analogRead(A3));
+  sendSensor("TEMP3",  analogRead(A4));
   delay(100);
 }

@@ -3,7 +3,7 @@ import Config
 # Add configuration that is only needed when running on the host here.
 
 config :elixirconf_av_network, ElixirconfAvNetwork.Web.Endpoint,
-  http: [ip: {0, 0, 0, 0}, port: 3000]
+  http: [ip: {0, 0, 0, 0}, port: 5150]
 
 # Hardcoded ports – run `mix arduino.ports` to find yours (numbers vary per USB port)
 config :elixirconf_av_network,

@@ -16,6 +16,12 @@
   --status-timeout-bg: #fff8c5;
   --status-not-found: #57606a;
   --status-not-found-bg: #eaeef2;
+  --status-outlier: #cf222e;
+  --status-outlier-bg: #ffebe9;
+  --status-unresolved: #8250df;
+  --status-unresolved-bg: #fbefff;
+  --status-suspect: #9a6700;
+  --status-suspect-bg: #fff8c5;
   --radius: 12px;
   --radius-sm: 8px;
   --shadow: 0 2px 16px rgba(31, 35, 40, 0.12);
@@ -187,6 +193,16 @@ body {
   background: var(--status-not-found-bg);
 }
 
+.sensor-card__badge--outlier {
+  color: var(--status-outlier);
+  background: var(--status-outlier-bg);
+}
+
+.sensor-card__badge--unresolved {
+  color: var(--status-unresolved);
+  background: var(--status-unresolved-bg);
+}
+
 .sensor-card__value {
   margin-bottom: 1rem;
   padding: 1rem;
@@ -216,6 +232,14 @@ body {
 
 .sensor-card--timed_out .sensor-card__value-data {
   color: var(--status-timeout);
+}
+
+.sensor-card--outlier .sensor-card__value-data {
+  color: var(--status-outlier);
+}
+
+.sensor-card--unresolved .sensor-card__value-data {
+  color: var(--status-unresolved);
 }
 
 .sensor-card__footer {

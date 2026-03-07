@@ -19,6 +19,11 @@ defmodule ElixirconfAvNetwork.Hardware.ProtocolBinary do
   @btn1 0x10
   @btn2 0x11
   @btn3 0x12
+  @temp1 0x30
+  @temp2 0x31
+  @temp3 0x32
+  @light1 0x20
+  @light2 0x21
 
   @spec sensor_name(any()) :: <<_::32>>
   def sensor_name(@pot1), do: "POT1"
@@ -26,6 +31,11 @@ defmodule ElixirconfAvNetwork.Hardware.ProtocolBinary do
   def sensor_name(@btn1), do: "BTN1"
   def sensor_name(@btn2), do: "BTN2"
   def sensor_name(@btn3), do: "BTN3"
+  def sensor_name(@temp1), do: "TEMP1"
+  def sensor_name(@temp2), do: "TEMP2"
+  def sensor_name(@temp3), do: "TEMP3"
+  def sensor_name(@light1), do: "LIGHT1"
+  def sensor_name(@light2), do: "LIGHT2"
 
   @spec extract_frame_from_buffer(bitstring()) ::
           :incomplete

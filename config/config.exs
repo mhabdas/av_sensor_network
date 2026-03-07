@@ -22,7 +22,7 @@ config :elixirconf_av_network,
   protocol: :json
 
 config :elixirconf_av_network, ElixirconfAvNetwork.Web.Endpoint,
-  url: [host: "localhost", port: 3000],
+  url: [host: "localhost", port: 5150],
   render_errors: [view: ElixirconfAvNetwork.Web.ErrorView, accepts: ~w(html)],
   pubsub_server: ElixirconfAvNetwork.PubSub,
   live_view: [signing_salt: "elixirconf_av_network_sensor_dash"]

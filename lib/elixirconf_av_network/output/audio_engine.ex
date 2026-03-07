@@ -55,18 +55,8 @@ defmodule ElixirconfAvNetwork.Output.AudioEngine do
     OSCOutput.send_message("/lfo_depth", [10.0])
   end
 
-  # TEMP1 -> additional cutoff
-  def handle("TEMP1", value) do
-    cutoff =
-      Float.round(500 + (value - 40) * 87.5, 1)
-      |> max(500.0)
-      |> min(4000.0)
-
-    OSCOutput.send_message("/temp_cutoff", [cutoff])
-  end
-
-  # TEMP2 -> reverb
-  def handle("TEMP2", value) do
+  # TEMP -> reverb
+  def handle("TEMP", value) do
     reverb =
       Float.round((value - 40) / 40, 2)
       |> max(0.0)

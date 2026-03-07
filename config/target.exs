@@ -88,6 +88,11 @@ config :mdns_lite,
     }
   ]
 
+# Phoenix/LiveView – serwer HTTP na RPi (dostęp z laptopa/telefonu w sieci)
+config :elixirconf_av_network, ElixirconfAvNetwork.Web.Endpoint,
+  http: [ip: {0, 0, 0, 0}, port: 5150],
+  url: [host: "nerves.local", port: 5150]
+
 # Hardcoded ports (autodetect commented out for now)
 config :elixirconf_av_network,
   arduino_interactive_port: "ttyACM0",
